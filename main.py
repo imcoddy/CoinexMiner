@@ -23,10 +23,21 @@ def main():
 
 	_private_api = CoinexAPI.PrivateAPI()
 
-	data = _private_api.get_info()
+	#data = _private_api.get_balances()
+
+	#print(data)
+
+	#data = _private_api.get_difficulty()
+
+	#print(data)
+
+
+
+
+	data = _private_api.get_latest_transaction('CDYBCH')
 
 	print(data)
-
+	
 		
 
 if __name__ == "__main__":

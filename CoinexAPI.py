@@ -53,18 +53,18 @@ class PrivateAPI(object):
 
     def __init__(self):
         super().__init__()
-        self.get_info()        
+    
         
 
-    def _buy(self, amount, price):
+    def _buy(self, amount, price, market):
         """Create a buy limit order"""
         request_client = RequestClient()
 
         data = {
                 "amount": "%.8f" % (amount*price),
-                "price": "%.8f" % (1.0/price),
-                "type": "sell",
-                "market": "BTCBCH"
+                "price": "%.8f" % (price),
+                "type": "buy",
+                "market": market
             }
 
         response = request_client.request(
@@ -85,9 +85,9 @@ class PrivateAPI(object):
 
         data = {
                 "amount": "%.8f" % (amount*price),
-                "price": "%.8f" % (1.0/price),
-                "type": "buy",
-                "market": "BTCBCH"
+                "price": "%.8f" % (price),
+                "type": "sell",
+                "market": market
             }
 
         response = request_client.request(
@@ -102,7 +102,7 @@ class PrivateAPI(object):
                 raise Exception(data["message"])
 
 
-    def get_info(self):
+    def get_balances(self):
         """Get balance"""
         request_client = RequestClient()
         response = request_client.request('GET', 'https://api.coinex.com/v1/balance/')
@@ -114,6 +114,97 @@ class PrivateAPI(object):
             elif "data" in data:         
                 return data
         else:
-            raise Exception("Critical error no balances retrieved")
+            raise Exception("Critical error no get_balances")
+
+
+    def get_difficulty(self):
+        """Get Difficulty"""
+        request_client = RequestClient()
+        response = request_client.request('GET', 'https://api.coinex.com/v1/order/mining/difficulty')
+
+        if response != None:
+            data = complex_json.loads(response.text)
+            if data["code"] != 0:
+                raise Exception(data["message"])
+            elif "data" in data:         
+                return data
+        else:
+            raise Exception("Critical error no get_difficulty")
+     
+
+    def get_latest_transaction(self,market):
+        request_client = RequestClient()
+        response = request_client.request('GET', 'https://api.coinex.com/v1/market/deals?market='+market)
+
+        if response != None:
+            data = complex_json.loads(response.text)
+            if data["code"] != 0:
+                raise Exception(data["message"])
+            elif "data" in data:         
+                return data
+        else:
+            raise Exception("Critical error no get_latest_transaction")
+
+    def get_ticker(self,market):
+        request_client = RequestClient()
+        response = request_client.request('GET', 'https://api.coinex.com/v1/market/ticker?market='+market)
+
+        if response != None:
+            data = complex_json.loads(response.text)
+            if data["code"] != 0:
+                raise Exception(data["message"])
+            elif "data" in data:         
+                return data
+        else:
+            raise Exception("Critical error no get_ticker")
+
+    def get_orders(self,market):
+        request_client = RequestClient()
+
+        data = {
+                "page": 1,
+                "limit": 100,
+                "market": market
+            }
+
+        response = request_client.request(
+                'GET',
+                'https://api.coinex.com/v1/order/pending',
+                params=data,
+        )
+
+        if response != None:
+            data = complex_json.loads(response.text)
+            if data["code"] != 0:
+                raise Exception(data["message"])
+            elif "data" in data:         
+                return data
+        else:
+            raise Exception("Critical error no get_orders")
+
+    def get_order(self,market,_id):
+        request_client = RequestClient()
+
+        data = {
+                "id": _id,
+                "market": market
+            }
+
+        response = request_client.request(
+                'GET',
+                'https://api.coinex.com/v1/order',
+                params=data,
+        )
+
+        if response != None:
+            data = complex_json.loads(response.text)
+            print(data)
+            if data["code"] != 0:
+                raise Exception(data["message"])
+            elif "data" in data:         
+                return data
+        else:
+            raise Exception("Critical error no get_order")
+
 
 
