@@ -95,9 +95,9 @@ def digging():
 			logging.info('space is enough')
 			price = sell_price - 0.00000001
 			amount = records['cdy_available'] / 10.0
-			logging.info('sell %0.3f at %f CDYBCH' % (amount,price))
+			logging.info('sell %0.3f at %0.8f CDYBCH' % (amount,price))
 			data_s = _private_api.sell(amount,price,'CDYBCH')
-			logging.info('buy %0.3f at %f CDYBCH' % (amount,price))
+			logging.info('buy %0.3f at %0.8f CDYBCH' % (amount,price))
 			data_b = _private_api.buy(amount,price,'CDYBCH')
 
 			stats_b = check_order_state('buy',data_b)
