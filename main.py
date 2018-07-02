@@ -3,6 +3,7 @@ import logging
 import math
 import time
 import json
+import pickle
 
 
 _private_api = CoinexAPI.PrivateAPI()
@@ -158,8 +159,15 @@ def balance_cost():
 	logging.info(records)
 
 def main():
+	global records
 	init_logger()
 	logging.info('Start Mining!')
+
+	try:
+		records = pickle.load(open('cache.data','rb'))
+	except Exception as e:
+		logging.info('no cache file found.')
+
 
 	while True:
 
@@ -190,6 +198,8 @@ def main():
 			logging.info('no fluctuation')
 			
 			status = digging()
+
+		pickle.dump(records,open('cache.data','wb'))
 
 		time.sleep(3)
 
