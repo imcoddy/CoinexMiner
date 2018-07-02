@@ -165,6 +165,7 @@ def main():
 
 	try:
 		records = pickle.load(open('cache.data','rb'))
+		logging.info(records)
 	except Exception as e:
 		logging.info('no cache file found.')
 

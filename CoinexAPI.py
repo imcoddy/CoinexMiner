@@ -5,6 +5,8 @@ import time
 import hashlib
 import json as complex_json
 import requests
+import logging
+import time
 
 class RequestClient(object):
     __headers = {
@@ -34,7 +36,7 @@ class RequestClient(object):
         params['tonce'] = int(time.time()*1000)
         self.headers['AUTHORIZATION'] = self.get_sign(params, self.secret_key)
 
-    def request(self, method, url, params={}, data='', json={}):
+    def _request(self, method, url, params={}, data='', json={}):
         method = method.upper()
         if method == 'GET':
             self.set_authorization(params)
@@ -45,6 +47,15 @@ class RequestClient(object):
             self.set_authorization(json)
             result = requests.request(method, url, json=json, headers=self.headers)
         return result
+
+    def request(self, method, url, params={}, data='', json={}):
+        try:
+            return _request(method,url,params,data,json)
+        except Exception as e:
+            logging.error(e.message)
+            time.sleep(0.5)
+            return _request(method,url,params,data,json)
+  
 
 
 
