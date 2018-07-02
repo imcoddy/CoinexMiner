@@ -140,21 +140,21 @@ def balance_cost():
 	logging.info('need buy bch: %0.3f' % records['bch_fees'])
 	data = _private_api.get_ticker('CETBCH')
 	data = data['data']
-	price = float(data['ticker']['sell'])
-	amount = records[bch_fees] / price
+	price = float(data['ticker']['buy'])
+	amount = records['bch_fees'] / price
 	logging.info('sell %0.3f at %f CETBCH' % (amount,price))
 	_private_api.sell(amount,price,'CETBCH')
-	records[bch_fees] = 0
+	records['bch_fees'] = 0
 	
 	
 	logging.info('need buy cdy: %0.3f' % records['cdy_fees'])
 	data = _private_api.get_ticker('CDYBCH')
 	data = data['data']
-	price = float(data['ticker']['buy'])
-	amount = records[cdy_fees]
-	logging.info('sell %0.3f at %f CDYBCH' % (amount,price))
+	price = float(data['ticker']['sell'])
+	amount = records['cdy_fees']
+	logging.info('buy %0.3f at %f CDYBCH' % (amount,price))
 	_private_api.buy(amount,price,'CDYBCH')
-	records[cdy_fees] = 0
+	records['cdy_fees'] = 0
 
 	logging.info(records)
 
