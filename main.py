@@ -95,7 +95,7 @@ def digging():
 		if sell_price - buy_price >= 0.000000019:
 			logging.info('space is enough')
 			price = sell_price - 0.00000001
-			amount = records['cdy_available'] / 10.0
+			amount = records['cdy_available'] / 5.0
 			logging.info('sell %0.3f at %0.8f CDYBCH' % (amount,price))
 			data_s = _private_api.sell(amount,price,'CDYBCH')
 			logging.info('buy %0.3f at %0.8f CDYBCH' % (amount,price))
