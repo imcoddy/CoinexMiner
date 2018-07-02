@@ -2,6 +2,7 @@ import CoinexAPI
 import logging
 import math
 import time
+import json
 
 
 _private_api = CoinexAPI.PrivateAPI()
@@ -11,6 +12,7 @@ records = {}
 records['bch_fees'] = 0
 records['cdy_fees'] = 0
 records['balance_cost_time'] = time.time()
+records['variance'] = 1
 
 def init_logger():
     logging.VERBOSE = 15
@@ -175,11 +177,16 @@ def main():
 			time.sleep(5)
 			continue
 
-		_variance = calculate_variance(_private_api)
+		try:
+			records['variance'] = calculate_variance(_private_api)
+		except json.decoder.JSONDecodeError as e:
+			logging.error('calculate_variance json.decoder.JSONDecodeError')
 
-		logging.info('wave ratio: %0.3f%%' % _variance)
+		
 
-		if _variance < 0.7:
+		logging.info('wave ratio: %0.3f%%' % records['variance'])
+
+		if records['variance'] < 0.7:
 			logging.info('no fluctuation')
 			
 			status = digging()
