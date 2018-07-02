@@ -50,11 +50,11 @@ class RequestClient(object):
 
     def request(self, method, url, params={}, data='', json={}):
         try:
-            return _request(method,url,params,data,json)
+            return self._request(method,url,params,data,json)
         except Exception as e:
-            logging.error(e.message)
+            logging.error(e)
             time.sleep(0.5)
-            return _request(method,url,params,data,json)
+            return self._request(method,url,params,data,json)
   
 
 
