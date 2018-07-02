@@ -56,12 +56,12 @@ class PrivateAPI(object):
     
         
 
-    def _buy(self, amount, price, market):
+    def buy(self, amount, price, market):
         """Create a buy limit order"""
         request_client = RequestClient()
 
         data = {
-                "amount": "%.8f" % (amount*price),
+                "amount": "%.8f" % (amount),
                 "price": "%.8f" % (price),
                 "type": "buy",
                 "market": market
@@ -77,14 +77,16 @@ class PrivateAPI(object):
             data = complex_json.loads(response.text)
             if data["code"] != 0:
                 raise Exception(data["message"])
+            elif "data" in data:         
+                return data
 
 
-    def _sell(self, amount, price):
+    def sell(self, amount, price, market):
         """Create a sell limit order"""
         request_client = RequestClient()
 
         data = {
-                "amount": "%.8f" % (amount*price),
+                "amount": "%.8f" % (amount),
                 "price": "%.8f" % (price),
                 "type": "sell",
                 "market": market
@@ -100,7 +102,8 @@ class PrivateAPI(object):
             data = complex_json.loads(response.text)
             if data["code"] != 0:
                 raise Exception(data["message"])
-
+            elif "data" in data:         
+                return data
 
     def get_balances(self):
         """Get balance"""
@@ -198,7 +201,6 @@ class PrivateAPI(object):
 
         if response != None:
             data = complex_json.loads(response.text)
-            print(data)
             if data["code"] != 0:
                 raise Exception(data["message"])
             elif "data" in data:         
