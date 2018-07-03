@@ -176,7 +176,12 @@ def main():
 
 	while True:
 
-		update_balance()
+		try:
+			update_balance()
+		except Exception as e:
+			logging.info('update_balance failed try again')
+			time.sleep(1)
+			update_balance()
 
 		cur_time = time.time()
 
