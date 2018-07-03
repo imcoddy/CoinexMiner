@@ -179,9 +179,17 @@ def main():
 		try:
 			update_balance()
 		except Exception as e:
-			logging.info('update_balance failed try again')
-			time.sleep(1)
-			update_balance()
+			logging.info('update_balance failed try again 1')
+			time.sleep(10)
+			try:
+				update_balance()
+			except Exception as e:
+				time.sleep(5*60)
+				logging.info('update_balance failed try again 2')
+				update_balance()
+
+
+			
 
 		cur_time = time.time()
 
@@ -204,7 +212,7 @@ def main():
 
 		logging.info('wave ratio: %0.3f%%' % records['variance'])
 
-		if records['variance'] < 0.7:
+		if records['variance'] < 1.1:
 			logging.info('no fluctuation')
 			
 			status = digging()
