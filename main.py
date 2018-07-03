@@ -137,7 +137,7 @@ def update_balance():
 	logging.info('bch_available: %0.3f' % records['bch_available'])
 
 def balance_cost():
-	records['bch_fees'] < 0.001 or records['cdy_fees'] < 10:
+	if records['bch_fees'] < 0.001 or records['cdy_fees'] < 10.0 :
 		logging.info('no need to balance the cost')
 		return
 
