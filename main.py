@@ -137,6 +137,10 @@ def update_balance():
 	logging.info('bch_available: %0.3f' % records['bch_available'])
 
 def balance_cost():
+	records['bch_fees'] < 0.001 or records['cdy_fees'] < 10:
+		logging.info('no need to balance the cost')
+		return
+
 	logging.info('need buy bch: %0.3f' % records['bch_fees'])
 	data = _private_api.get_ticker('CETBCH')
 	data = data['data']
