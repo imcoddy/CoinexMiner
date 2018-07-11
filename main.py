@@ -4,14 +4,15 @@ import math
 import time
 import json
 import pickle
+import config
 
 
 _private_api = CoinexAPI.PrivateAPI()
 
 
 records = {}
-records['bch_fees'] = 0
-records['cdy_fees'] = 0
+records['money_fees'] = 0
+records['goods_fees'] = 0
 records['balance_cost_time'] = time.time()
 records['variance'] = 1
 
@@ -32,7 +33,7 @@ def init_logger():
 
 
 def calculate_variance(_private_api):
-	data = _private_api.get_latest_transaction('CDYBCH')
+	data = _private_api.get_latest_transaction(config.market)
 	data = data['data']
 	_sum = 0
 	for x in data:
@@ -64,15 +65,15 @@ def check_order_state(_type,data):
 	while True:
 		if left_amout == 0:
 			if _type == 'sell':
-				records['bch_fees'] = records['bch_fees'] + float(data['deal_fee'])
+				records['money_fees'] = records['money_fees'] + float(data['deal_fee'])
 			else:
-				records['cdy_fees'] = records['cdy_fees'] + float(data['deal_fee'])
+				records['goods_fees'] = records['goods_fees'] + float(data['deal_fee'])
 
 			logging.info(records)
 			return 'done'
 		else:
 			time.sleep(0.1)
-			data = _private_api.get_order('CDYBCH',_id)
+			data = _private_api.get_order(config.market,_id)
 			data = data['data']
 			left_amout = float(data['left'])
 			logging.info('check order state: id %d left %0.3f' % (_id,left_amout))
@@ -87,7 +88,7 @@ def check_order_state(_type,data):
 def digging():
 	index = 0
 	while True:
-		data = _private_api.get_ticker('CDYBCH')
+		data = _private_api.get_ticker(config.market)
 		data = data['data']
 		sell_price = float(data['ticker']['sell'])
 		buy_price = float(data['ticker']['buy'])
@@ -95,11 +96,13 @@ def digging():
 		if sell_price - buy_price >= 0.000000019:
 			logging.info('space is enough')
 			price = sell_price - 0.00000001
-			amount = records['cdy_available'] / 5.0
-			logging.info('sell %0.3f at %0.8f CDYBCH' % (amount,price))
-			data_s = _private_api.sell(amount,price,'CDYBCH')
-			logging.info('buy %0.3f at %0.8f CDYBCH' % (amount,price))
-			data_b = _private_api.buy(amount,price,'CDYBCH')
+			price_s = price
+			price_b = price * (1 - config.bid_ask_spread/100.0)
+			amount = records['goods_available'] * config.partial_ratio
+			logging.info('sell %0.3f at %0.8f %s' % (amount,price_s,config.market))
+			data_s = _private_api.sell(amount,price,config.market)
+			logging.info('buy %0.3f at %0.8f %s' % (amount,price_b,config.market))
+			data_b = _private_api.buy(amount,price,config.market)
 
 			stats_b = check_order_state('buy',data_b)
 			stats_s = check_order_state('sell',data_s)
@@ -141,37 +144,38 @@ def update_balance():
 	data = _private_api.get_balances();
 	data = data['data']
 
-	records['cdy_available'] = float(data['CDY']['available'])
+	records['goods_available'] = float(data[config.goods]['available'])
 	records['cet_available'] = float(data['CET']['available'])
-	records['bch_available'] = float(data['BCH']['available'])
+	records['money_available'] = float(data[config.money]['available'])
 
-	logging.info('cdy_available: %0.3f' % records['cdy_available'])
+	logging.info('goods_available: %0.3f' % records['goods_available'])
 	logging.info('cet_available: %0.3f' % records['cet_available'])
-	logging.info('bch_available: %0.3f' % records['bch_available'])
+	logging.info('money_available: %0.3f' % records['money_available'])
 
 def balance_cost():
-	if records['bch_fees'] < 0.001 or records['cdy_fees'] < 10.0 :
+	if records['money_fees'] < 0.001 or records['goods_fees'] < 10.0 :
 		logging.info('no need to balance the cost')
 		return
 
-	logging.info('need buy bch: %0.3f' % records['bch_fees'])
-	data = _private_api.get_ticker('CETBCH')
+	money_markets = 'CET' + config.money
+	logging.info('need buy %s: %0.3f' % (records['money_fees'],config.money))
+	data = _private_api.get_ticker(money_markets)
 	data = data['data']
 	price = float(data['ticker']['buy'])
-	amount = records['bch_fees'] / price
-	logging.info('sell %0.3f at %f CETBCH' % (amount,price))
-	_private_api.sell(amount,price,'CETBCH')
-	records['bch_fees'] = 0
+	amount = records['money_fees'] / price
+	logging.info('sell %0.3f at %f %s' % (amount,price,money_markets))
+	_private_api.sell(amount,price,money_markets)
+	records['money_fees'] = 0
 	
-	
-	logging.info('need buy cdy: %0.3f' % records['cdy_fees'])
-	data = _private_api.get_ticker('CDYBCH')
+	goods_markets = config.market
+	logging.info('need buy %s: %0.3f' % (records['goods_fees'],config.goods))
+	data = _private_api.get_ticker(goods_markets)
 	data = data['data']
 	price = float(data['ticker']['sell'])
-	amount = records['cdy_fees']
-	logging.info('buy %0.3f at %f CDYBCH' % (amount,price))
-	_private_api.buy(amount,price,'CDYBCH')
-	records['cdy_fees'] = 0
+	amount = records['goods_fees']
+	logging.info('buy %0.3f at %f %s' % (amount,price,goods_markets))
+	_private_api.buy(amount,price,goods_markets)
+	records['goods_fees'] = 0
 
 	logging.info(records)
 
@@ -197,8 +201,8 @@ def main():
 			try:
 				update_balance()
 			except Exception as e:
-				time.sleep(5*60)
 				logging.info('update_balance failed try again 2')
+				time.sleep(5*60)				
 				update_balance()
 
 
@@ -225,7 +229,7 @@ def main():
 
 		logging.info('wave ratio: %0.3f%%' % records['variance'])
 
-		if records['variance'] < 1.1:
+		if records['variance'] < config.wave_ratio:
 			logging.info('no fluctuation')
 			
 			status = digging()
