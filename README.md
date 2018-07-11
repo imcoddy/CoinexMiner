@@ -47,6 +47,7 @@ market = "CDYBCH"
 
 goods = "CDY"
 交易对商品 也可以是 "BTC" 等等 请注意和market对应
+
 money = "BCH"
 交易对计价币种 也可以是 "USDT" 等等 请注意和market对应
 
