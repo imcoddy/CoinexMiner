@@ -70,6 +70,10 @@ money = "BCH"
 7. python balance_cost.py 手动平衡消耗的手续费(程序主动退出或者异常退出后使用)
 
 
+# 问题反馈
+1. 通过github的 issues 提交
+2. 通过wechat联系我 wechat_id: kenshin1987
+3. 通过telegram http://t.me/bitcoin_faith
 
 
 # 免责声明
